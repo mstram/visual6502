@@ -10,10 +10,15 @@
 
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-*/
 
-// mike
-var mikeNoZoomOnFind = false;
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+*/
 
 var centerx=300, centery=300;
 var zoom=1;
@@ -110,7 +115,6 @@ function setup_part4(){
 		document.getElementById('stop').style.visibility = 'hidden';
 		go();
 	}
-
 }
 
 function detectOldBrowser(){
@@ -370,7 +374,6 @@ function boxLabel(args) {
 	ctx.fillText(text, boxXmin, boxYmin);
 }
 
-// mike
 var highlightThese;
 
 // flash some set of nodes according to user input
@@ -441,15 +444,7 @@ function hiliteNodeList(){
 			if(seglist[s][i+1]>ymax) ymax=seglist[s][i+1];
 		}
 	}
-	// mike
-
-         //alert('zoomToBox: mikeNoZoomOnFind = ' + mikeNoZoomOnFind);
-         if(mikeNoZoomOnFind == false) {
-         //  alert('zoomToBox:(false) mikeNoZoomOnFind = ' + mikeNoZoomOnFind);
-	   zoomToBox(xmin,xmax,ymin,ymax);
-         }
-
-        //zoomToBox(xmin,xmax,ymin,ymax);
+	zoomToBox(xmin,xmax,ymin,ymax);
 	updateLinkHere();
 	clearHighlight();  // nullify the simulation overlay (orange/purple)
 	hiliteNode(-1);    // unhighlight all nodes

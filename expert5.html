@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+
+<head>
+<title>Visual 6502 in JavaScript</title>
+<style type="text/css">@import "expert.css";</style>
+
+<!-- <script src="mike_expert-allinone.js"></script> -->
+
+<script src="expert-allinone_debug.js"></script>
+<script src="mike2.js"></script
+
+<!--
+  <script src="segdefs.js">                  </script>
+  <script src="transdefs.js">                </script>
+  <script src="nodenames.js">                </script>
+  <script src="wires.js">                    </script>
+  <script src="expertWires.js">              </script>
+  <script src="chipsim.js">                  </script>
+  <script src="memtable.js">                 </script>
+  <script src="macros.js">                   </script>
+  <script src="testprogram.js">              </script>
+  <script src="3rdparty/jquery-1.3.2.min.js"> </script>
+  <script src="3rdparty/jquery.cookie.js">   </script>
+  <script src="3rdparty/splitter.js">        </script>
+ -->
+
+<script type="text/javascript">
+function handleOnload() {
+	/MSIE (\d+\.\d+);/.test(navigator.appVersion);
+	IEVersion=Number(RegExp.$1);
+	if((navigator.appName == 'Microsoft Internet Explorer') && (IEVersion<9)){
+		document.getElementById('browsertrouble').innerHTML=
+			'<p>Sorry, "+navigator.appName+" not supported - showing you a picture instead!</p>';
+		document.getElementById('frame').innerHTML='<a href="browsertrouble.html"><img src="images/jssim2.png" style="border:10px"></a>';
+	}else{
+		setTimeout(setup,200);
+	}
+};
+
+// initialise splitter (built on jquery)
+$().ready(function(){
+	$("#frame").splitter({
+		type: "v",
+		outline: true,
+		minLeft: 20,
+		sizeLeft: 810,
+		resizeToWidth: true,
+		anchorToWindow: true,
+	});
+	$("#rightcolumn").splitter({
+		type: "h",
+		outline: true,
+		sizeBottom: 180,
+		minTop: 100,
+	});
+});
+</script>
+
+</head>
+
+<body onload="handleOnload();">
+<span id="plain">
+<a href="http://www.visual6502.org/faq.html">FAQ</a>&nbsp;
+<a href="http://blog.visual6502.org">Blog</a>&nbsp;
+<a href="http://www.visual6502.org/links.html">Links</a>&nbsp;
+<a href="http://github.com/trebonian/visual6502">Source</a>&nbsp;
+<a href="http://www.6502asm.com/">6502asm assembler</a>&nbsp;
+<a href="http://www.e-tradition.net/bytes/6502/disassembler.html">e-tradition disassembler</a>&nbsp;
+</span>
+<div class="frame" id="frame">
+<div class="leftcolumn" id="leftcolumn">
+<div id="chipsurround" tabindex="1">
+<!-- mike -->
+<div class="chip" id="chip">
+<span id="waiting">Please wait, graphics initialising...</span>
+<canvas class="chip" id="chipbg"></canvas>
+<canvas class="chip" id="overlay"></canvas>
+<canvas class="chip" id="hilite"></canvas>
+<canvas class="chip" id="hitbuffer"></canvas>
+</div>
+</div> <!-- chipsurround -->
+<div class="nochip" id="nochip">
+  <form>
+  <input type="button" value="Show chip layout" onclick="updateChipLayoutVisibility(true)" />
+  </form>
+</div>
+<div id="layoutControlPanel">
+  Use 'z' or '>' to zoom in, 'x' or '<' to zoom out, click to probe signals and drag to pan.
+
+  <form id="updateShow"> Show:
+  <input type="checkbox" name="1" id="updateShow1" onchange="updateShow(this.name,this.checked)" />(diffusion)
+  <input type="checkbox" name="3" id="updateShow3" onchange="updateShow(this.name,this.checked)" />(grounded diffusion)
+  <input type="checkbox" name="4" id="updateShow4" onchange="updateShow(this.name,this.checked)" />(powered diffusion)
+  <input type="checkbox" name="5" id="updateShow5" onchange="updateShow(this.name,this.checked)" />(polysilicon)
+  <input type="checkbox" name="0" id="updateShow0" onchange="updateShow(this.name,this.checked)" />(metal)
+  <input type="checkbox" name="2" id="updateShow2" onchange="updateShow(this.name,this.checked)" />(protection)
+  </form>
+
+  <form action="javascript:hiliteNodeList();">
+  <input type="button" value="Find:" onclick="hiliteNodeList();" />
+  <!-- mike -->
+  <input type="button" value="Add to List" onclick="mikeAddToList();" />
+
+  <input type="text" id="HighlightThese" name="HighlightThese" value="" />
+
+      <!-- mike -->
+    <select id="selMikeHighlightList" onchange="doMikeSelect1()">
+      <option value="res" selected="selected">res</option>
+      <option value="vcc">vcc</option>
+      <option value="vss">vss</option>
+      <option value="Reset0">Reset0</option>
+      <option value="ir0 ir1 ir2 ir3 ir4 ir5 ir6 ir7">ir0-ir7</option>
+      <option value="a0 a1 a2 a3 a4 a5 a6 a7">a0-a7</option>
+      <option value="clk0">clk0</option>
+      <option value="clk1out">clk1out</option>
+      <option value="clk2out">clk1out</option>
+       <option value="rw">rw</option>
+<option value="##alucout">##alucout</option>
+<option value="#(A+B)0">#(A+B)0</option>
+<option value="#(A+B)1">#(A+B)1</option>
+<option value="#(A+B)2">#(A+B)2</option>
+<option value="#(A+B)3">#(A+B)3</option>
+<option value="#(A+B)4">#(A+B)4</option>
+<option value="#(A+B)5">#(A+B)5</option>
+<option value="#(A+B)6">#(A+B)6</option>
+<option value="#(A+B)7">#(A+B)7</option>
+<option value="#(AxB)0">#(AxB)0</option>
+<option value="#(AxB)1">#(AxB)1</option>
+<option value="#(AxB)2">#(AxB)2</option>
+<option value="#(AxB)3">#(AxB)3</option>
+<option value="#(AxB)4">#(AxB)4</option>
+<option value="#(AxB)5">#(AxB)5</option>
+<option value="#(AxB)6">#(AxB)6</option>
+<option value="#(AxB)7">#(AxB)7</option>
+<option value="#(AxB1).C01">#(AxB1).C01</option>
+<option value="#(AxB3).C23">#(AxB3).C23</option>
+<option value="#(AxB5).C45">#(AxB5).C45</option>
+<option value="#(AxB7).C67">#(AxB7).C67</option>
+<option value="#(AxBxC)0">#(AxBxC)0</option>
+<option value="#(AxBxC)1">#(AxBxC)1</option>
+<option value="#(AxBxC)2">#(AxBxC)2</option>
+<option value="#(AxBxC)3">#(AxBxC)3</option>
+<option value="#(AxBxC)4">#(AxBxC)4</option>
+<option value="#(AxBxC)5">#(AxBxC)5</option>
+<option value="#(AxBxC)6">#(AxBxC)6</option>
+<option value="#(AxBxC)7">#(AxBxC)7</option>
+<option value="#A.B0">#A.B0</option>
+<option value="#A.B1">#A.B1</option>
+<option value="#A.B2">#A.B2</option>
+<option value="#A.B3">#A.B3</option>
+<option value="#A.B4">#A.B4</option>
+<option value="#A.B5">#A.B5</option>
+<option value="#A.B6">#A.B6</option>
+<option value="#A.B7">#A.B7</option>
+<option value="#ABH0">#ABH0</option>
+<option value="#ABH1">#ABH1</option>
+<option value="#ABH2">#ABH2</option>
+<option value="#ABH3">#ABH3</option>
+<option value="#ABH4">#ABH4</option>
+<option value="#ABH5">#ABH5</option>
+<option value="#ABH6">#ABH6</option>
+<option value="#ABH7">#ABH7</option>
+<option value="#ABL0">#ABL0</option>
+<option value="#ABL1">#ABL1</option>
+<option value="#ABL2">#ABL2</option>
+<option value="#ABL3">#ABL3</option>
+<option value="#ABL4">#ABL4</option>
+<option value="#ABL5">#ABL5</option>
+<option value="#ABL6">#ABL6</option>
+<option value="#ABL7">#ABL7</option>
+<option value="#C01">#C01</option>
+<option value="#C12">#C12</option>
+<option value="#C23">#C23</option>
+<option value="#C34">#C34</option>
+<option value="#C45">#C45</option>
+<option value="#C56">#C56</option>
+<option value="#C67">#C67</option>
+<option value="#C78">#C78</option>
+<option value="#DA-ADD1">#DA-ADD1</option>
+<option value="#DA-ADD2">#DA-ADD2</option>
+<option value="#DBE">#DBE</option>
+<option value="#DBZ">#DBZ</option>
+<option value="#IRQP">#IRQP</option>
+<option value="#NMIG">#NMIG</option>
+<option value="#NMIP">#NMIP</option>
+<option value="#TWOCYCLE">#TWOCYCLE</option>
+<option value="#TWOCYCLE.phi1">#TWOCYCLE.phi1</option>
+<option value="#VEC">#VEC</option>
+<option value="#WR">#WR</option>
+<option value="#alucout">#alucout</option>
+<option value="#aluresult0">#aluresult0</option>
+<option value="#aluresult1">#aluresult1</option>
+<option value="#aluresult2">#aluresult2</option>
+<option value="#aluresult3">#aluresult3</option>
+<option value="#aluresult4">#aluresult4</option>
+<option value="#aluresult5">#aluresult5</option>
+<option value="#aluresult6">#aluresult6</option>
+<option value="#aluresult7">#aluresult7</option>
+<option value="#notRdy0.delay">#notRdy0.delay</option>
+<option value="#op-T3-branch">#op-T3-branch</option>
+<option value="#op-branch-bit6">#op-branch-bit6</option>
+<option value="#op-branch-bit7">#op-branch-bit7</option>
+<option value="#op-branch-done">#op-branch-done</option>
+<option value="#op-set-C">#op-set-C</option>
+<option value="#op-store">#op-store</option>
+<option value="#pchp0">#pchp0</option>
+<option value="#pchp1">#pchp1</option>
+<option value="#pchp2">#pchp2</option>
+<option value="#pchp3">#pchp3</option>
+<option value="#pchp4">#pchp4</option>
+<option value="#pchp5">#pchp5</option>
+<option value="#pchp6">#pchp6</option>
+<option value="#pchp7">#pchp7</option>
+<option value="#pclp0">#pclp0</option>
+<option value="#pclp1">#pclp1</option>
+<option value="#pclp2">#pclp2</option>
+<option value="#pclp3">#pclp3</option>
+<option value="#pclp4">#pclp4</option>
+<option value="#pclp5">#pclp5</option>
+<option value="#pclp6">#pclp6</option>
+<option value="#pclp7">#pclp7</option>
+<option value="(AxB)0.#C0in">(AxB)0.#C0in</option>
+<option value="(AxB)0.~C0in">(AxB)0.~C0in</option>
+<option value="(AxB)2.#C12">(AxB)2.#C12</option>
+<option value="(AxB)2.~C12">(AxB)2.~C12</option>
+<option value="(AxB)4.#C34">(AxB)4.#C34</option>
+<option value="(AxB)4.~C34">(AxB)4.~C34</option>
+<option value="(AxB)6.#C56">(AxB)6.#C56</option>
+<option value="(AxB)6.~C56">(AxB)6.~C56</option>
+<option value="0/ADL0">0/ADL0</option>
+<option value="0/ADL1">0/ADL1</option>
+<option value="0/ADL2">0/ADL2</option>
+<option value="A+B0">A+B0</option>
+<option value="A+B1">A+B1</option>
+<option value="A+B2">A+B2</option>
+<option value="A+B3">A+B3</option>
+<option value="A+B4">A+B4</option>
+<option value="A+B5">A+B5</option>
+<option value="A+B6">A+B6</option>
+<option value="A+B7">A+B7</option>
+<option value="ADH/ABH">ADH/ABH</option>
+<option value="ADL/ABL">ADL/ABL</option>
+<option value="AxB1">AxB1</option>
+<option value="AxB3">AxB3</option>
+<option value="AxB5">AxB5</option>
+<option value="AxB7">AxB7</option>
+<option value="BRtaken">BRtaken</option>
+<option value="C01">C01</option>
+<option value="C12">C12</option>
+<option value="C1x5Reset">C1x5Reset</option>
+<option value="C23">C23</option>
+<option value="C34">C34</option>
+<option value="C45">C45</option>
+<option value="C56">C56</option>
+<option value="C67">C67</option>
+<option value="C78">C78</option>
+<option value="C78.phi2">C78.phi2</option>
+<option value="D1x1">D1x1</option>
+<option value="DA-AB2">DA-AB2</option>
+<option value="DA-AxB2">DA-AxB2</option>
+<option value="DA-C01">DA-C01</option>
+<option value="DA-C45">DA-C45</option>
+<option value="DBNeg">DBNeg</option>
+<option value="DBZ">DBZ</option>
+<option value="DC34">DC34</option>
+<option value="DC78">DC78</option>
+<option value="DC78.phi2">DC78.phi2</option>
+<option value="H1x1">H1x1</option>
+<option value="INTG">INTG</option>
+<option value="IRQP">IRQP</option>
+<option value="NMIL">NMIL</option>
+<option value="NMIP">NMIP</option>
+<option value="ONEBYTE">ONEBYTE</option>
+<option value="PD-0xx0xx0x">PD-0xx0xx0x</option>
+<option value="PD-1xx000x0">PD-1xx000x0</option>
+<option value="PD-n-0xx0xx0x">PD-n-0xx0xx0x</option>
+<option value="PD-xxx010x1">PD-xxx010x1</option>
+<option value="PD-xxxx10x0">PD-xxxx10x0</option>
+<option value="Pout0">Pout0</option>
+<option value="Pout1">Pout1</option>
+<option value="Pout2">Pout2</option>
+<option value="Pout3">Pout3</option>
+<option value="Pout4">Pout4</option>
+<option value="Pout5">Pout5</option>
+<option value="Pout6">Pout6</option>
+<option value="Pout7">Pout7</option>
+<option value="RESG">RESG</option>
+<option value="RESP">RESP</option>
+<option value="Reset0">Reset0</option>
+<option value="RnWstretched">RnWstretched</option>
+<option value="VEC0">VEC0</option>
+<option value="VEC1">VEC1</option>
+<option value="a0">a0</option>
+<option value="a1">a1</option>
+<option value="a2">a2</option>
+<option value="a3">a3</option>
+<option value="a4">a4</option>
+<option value="a5">a5</option>
+<option value="a6">a6</option>
+<option value="a7">a7</option>
+<option value="ab0">ab0</option>
+<option value="ab1">ab1</option>
+<option value="ab10">ab10</option>
+<option value="ab11">ab11</option>
+<option value="ab12">ab12</option>
+<option value="ab13">ab13</option>
+<option value="ab14">ab14</option>
+<option value="ab15">ab15</option>
+<option value="ab2">ab2</option>
+<option value="ab3">ab3</option>
+<option value="ab4">ab4</option>
+<option value="ab5">ab5</option>
+<option value="ab6">ab6</option>
+<option value="ab7">ab7</option>
+<option value="ab8">ab8</option>
+<option value="ab9">ab9</option>
+<option value="abh0">abh0</option>
+<option value="abh1">abh1</option>
+<option value="abh2">abh2</option>
+<option value="abh3">abh3</option>
+<option value="abh4">abh4</option>
+<option value="abh5">abh5</option>
+<option value="abh6">abh6</option>
+<option value="abh7">abh7</option>
+<option value="abl0">abl0</option>
+<option value="abl1">abl1</option>
+<option value="abl2">abl2</option>
+<option value="abl3">abl3</option>
+<option value="abl4">abl4</option>
+<option value="abl5">abl5</option>
+<option value="abl6">abl6</option>
+<option value="abl7">abl7</option>
+<option value="adh0">adh0</option>
+<option value="adh1">adh1</option>
+<option value="adh2">adh2</option>
+<option value="adh3">adh3</option>
+<option value="adh4">adh4</option>
+<option value="adh5">adh5</option>
+<option value="adh6">adh6</option>
+<option value="adh7">adh7</option>
+<option value="adl0">adl0</option>
+<option value="adl1">adl1</option>
+<option value="adl2">adl2</option>
+<option value="adl3">adl3</option>
+<option value="adl4">adl4</option>
+<option value="adl5">adl5</option>
+<option value="adl6">adl6</option>
+<option value="adl7">adl7</option>
+<option value="alu0">alu0</option>
+<option value="alu1">alu1</option>
+<option value="alu2">alu2</option>
+<option value="alu3">alu3</option>
+<option value="alu4">alu4</option>
+<option value="alu5">alu5</option>
+<option value="alu6">alu6</option>
+<option value="alu7">alu7</option>
+<option value="alua0">alua0</option>
+<option value="alua1">alua1</option>
+<option value="alua2">alua2</option>
+<option value="alua3">alua3</option>
+<option value="alua4">alua4</option>
+<option value="alua5">alua5</option>
+<option value="alua6">alua6</option>
+<option value="alua7">alua7</option>
+<option value="alub0">alub0</option>
+<option value="alub1">alub1</option>
+<option value="alub2">alub2</option>
+<option value="alub3">alub3</option>
+<option value="alub4">alub4</option>
+<option value="alub5">alub5</option>
+<option value="alub6">alub6</option>
+<option value="alub7">alub7</option>
+<option value="alucin">alucin</option>
+<option value="alucout">alucout</option>
+<option value="alurawcout">alurawcout</option>
+<option value="aluvout">aluvout</option>
+<option value="branch-back">branch-back</option>
+<option value="branch-back.phi1">branch-back.phi1</option>
+<option value="branch-forward.phi1">branch-forward.phi1</option>
+<option value="brk-done">brk-done</option>
+<option value="cclk">cclk</option>
+<option value="clearIR">clearIR</option>
+<option value="clk0">clk0</option>
+<option value="clk1out">clk1out</option>
+<option value="clk2out">clk2out</option>
+<option value="clock1">clock1</option>
+<option value="clock2">clock2</option>
+<option value="cp1">cp1</option>
+<option value="dasb0">dasb0</option>
+<option value="dasb1">dasb1</option>
+<option value="dasb2">dasb2</option>
+<option value="dasb3">dasb3</option>
+<option value="dasb4">dasb4</option>
+<option value="dasb5">dasb5</option>
+<option value="dasb6">dasb6</option>
+<option value="dasb7">dasb7</option>
+<option value="db0">db0</option>
+<option value="db1">db1</option>
+<option value="db2">db2</option>
+<option value="db3">db3</option>
+<option value="db4">db4</option>
+<option value="db5">db5</option>
+<option value="db6">db6</option>
+<option value="db7">db7</option>
+<option value="dor0">dor0</option>
+<option value="dor1">dor1</option>
+<option value="dor2">dor2</option>
+<option value="dor3">dor3</option>
+<option value="dor4">dor4</option>
+<option value="dor5">dor5</option>
+<option value="dor6">dor6</option>
+<option value="dor7">dor7</option>
+<option value="dpc0_YSB">dpc0_YSB</option>
+<option value="dpc10_ADLADD">dpc10_ADLADD</option>
+<option value="dpc11_SBADD">dpc11_SBADD</option>
+<option value="dpc12_0ADD">dpc12_0ADD</option>
+<option value="dpc13_ORS">dpc13_ORS</option>
+<option value="dpc14_SRS">dpc14_SRS</option>
+<option value="dpc15_ANDS">dpc15_ANDS</option>
+<option value="dpc16_EORS">dpc16_EORS</option>
+<option value="dpc17_SUMS">dpc17_SUMS</option>
+<option value="dpc18_#DAA">dpc18_#DAA</option>
+<option value="dpc18_~DAA">dpc18_~DAA</option>
+<option value="dpc19_ADDSB7">dpc19_ADDSB7</option>
+<option value="dpc1_SBY">dpc1_SBY</option>
+<option value="dpc20_ADDSB06">dpc20_ADDSB06</option>
+<option value="dpc21_ADDADL">dpc21_ADDADL</option>
+<option value="dpc22_#DSA">dpc22_#DSA</option>
+<option value="dpc22_~DSA">dpc22_~DSA</option>
+<option value="dpc23_SBAC">dpc23_SBAC</option>
+<option value="dpc24_ACSB">dpc24_ACSB</option>
+<option value="dpc25_SBDB">dpc25_SBDB</option>
+<option value="dpc26_ACDB">dpc26_ACDB</option>
+<option value="dpc27_SBADH">dpc27_SBADH</option>
+<option value="dpc28_0ADH0">dpc28_0ADH0</option>
+<option value="dpc29_0ADH17">dpc29_0ADH17</option>
+<option value="dpc2_XSB">dpc2_XSB</option>
+<option value="dpc30_ADHPCH">dpc30_ADHPCH</option>
+<option value="dpc31_PCHPCH">dpc31_PCHPCH</option>
+<option value="dpc32_PCHADH">dpc32_PCHADH</option>
+<option value="dpc33_PCHDB">dpc33_PCHDB</option>
+<option value="dpc34_PCLC">dpc34_PCLC</option>
+<option value="dpc35_PCHC">dpc35_PCHC</option>
+<option value="dpc36_#IPC">dpc36_#IPC</option>
+<option value="dpc36_~IPC">dpc36_~IPC</option>
+<option value="dpc37_PCLDB">dpc37_PCLDB</option>
+<option value="dpc38_PCLADL">dpc38_PCLADL</option>
+<option value="dpc39_PCLPCL">dpc39_PCLPCL</option>
+<option value="dpc3_SBX">dpc3_SBX</option>
+<option value="dpc40_ADLPCL">dpc40_ADLPCL</option>
+<option value="dpc41_DL/ADL">dpc41_DL/ADL</option>
+<option value="dpc42_DL/ADH">dpc42_DL/ADH</option>
+<option value="dpc43_DL/DB">dpc43_DL/DB</option>
+<option value="dpc4_SSB">dpc4_SSB</option>
+<option value="dpc5_SADL">dpc5_SADL</option>
+<option value="dpc6_SBS">dpc6_SBS</option>
+<option value="dpc7_SS">dpc7_SS</option>
+<option value="dpc8_nDBADD">dpc8_nDBADD</option>
+<option value="dpc9_DBADD">dpc9_DBADD</option>
+<option value="fetch">fetch</option>
+<option value="idb0">idb0</option>
+<option value="idb1">idb1</option>
+<option value="idb2">idb2</option>
+<option value="idb3">idb3</option>
+<option value="idb4">idb4</option>
+<option value="idb5">idb5</option>
+<option value="idb6">idb6</option>
+<option value="idb7">idb7</option>
+<option value="idl0">idl0</option>
+<option value="idl1">idl1</option>
+<option value="idl2">idl2</option>
+<option value="idl3">idl3</option>
+<option value="idl4">idl4</option>
+<option value="idl5">idl5</option>
+<option value="idl6">idl6</option>
+<option value="idl7">idl7</option>
+<option value="ir0">ir0</option>
+<option value="ir1">ir1</option>
+<option value="ir2">ir2</option>
+<option value="ir3">ir3</option>
+<option value="ir4">ir4</option>
+<option value="ir5">ir5</option>
+<option value="ir6">ir6</option>
+<option value="ir7">ir7</option>
+<option value="irline3">irline3</option>
+<option value="irq">irq</option>
+<option value="nmi">nmi</option>
+<option value="nnT2BR">nnT2BR</option>
+<option value="notRdy0">notRdy0</option>
+<option value="notRdy0.delay">notRdy0.delay</option>
+<option value="notRdy0.phi1">notRdy0.phi1</option>
+<option value="notRnWprepad">notRnWprepad</option>
+<option value="notalu0">notalu0</option>
+<option value="notalu1">notalu1</option>
+<option value="notalu2">notalu2</option>
+<option value="notalu3">notalu3</option>
+<option value="notalu4">notalu4</option>
+<option value="notalu5">notalu5</option>
+<option value="notalu6">notalu6</option>
+<option value="notalu7">notalu7</option>
+<option value="notalucin">notalucin</option>
+<option value="notalucout">notalucout</option>
+<option value="notaluvout">notaluvout</option>
+<option value="notdor0">notdor0</option>
+<option value="notdor1">notdor1</option>
+<option value="notdor2">notdor2</option>
+<option value="notdor3">notdor3</option>
+<option value="notdor4">notdor4</option>
+<option value="notdor5">notdor5</option>
+<option value="notdor6">notdor6</option>
+<option value="notdor7">notdor7</option>
+<option value="notidl0">notidl0</option>
+<option value="notidl1">notidl1</option>
+<option value="notidl2">notidl2</option>
+<option value="notidl3">notidl3</option>
+<option value="notidl4">notidl4</option>
+<option value="notidl5">notidl5</option>
+<option value="notidl6">notidl6</option>
+<option value="notidl7">notidl7</option>
+<option value="notir0">notir0</option>
+<option value="notir1">notir1</option>
+<option value="notir2">notir2</option>
+<option value="notir3">notir3</option>
+<option value="notir4">notir4</option>
+<option value="notir5">notir5</option>
+<option value="notir6">notir6</option>
+<option value="notir7">notir7</option>
+<option value="nots0">nots0</option>
+<option value="nots1">nots1</option>
+<option value="nots2">nots2</option>
+<option value="nots3">nots3</option>
+<option value="nots4">nots4</option>
+<option value="nots5">nots5</option>
+<option value="nots6">nots6</option>
+<option value="nots7">nots7</option>
+<option value="notx0">notx0</option>
+<option value="notx1">notx1</option>
+<option value="notx2">notx2</option>
+<option value="notx3">notx3</option>
+<option value="notx4">notx4</option>
+<option value="notx5">notx5</option>
+<option value="notx6">notx6</option>
+<option value="notx7">notx7</option>
+<option value="noty0">noty0</option>
+<option value="noty1">noty1</option>
+<option value="noty2">noty2</option>
+<option value="noty3">noty3</option>
+<option value="noty4">noty4</option>
+<option value="noty5">noty5</option>
+<option value="noty6">noty6</option>
+<option value="noty7">noty7</option>
+<option value="op-ANDS">op-ANDS</option>
+<option value="op-EORS">op-EORS</option>
+<option value="op-ORS">op-ORS</option>
+<option value="op-SRS">op-SRS</option>
+<option value="op-SUMS">op-SUMS</option>
+<option value="op-T+-adc/sbc">op-T+-adc/sbc</option>
+<option value="op-T+-asl/rol-a">op-T+-asl/rol-a</option>
+<option value="op-T+-bit">op-T+-bit</option>
+<option value="op-T+-cmp">op-T+-cmp</option>
+<option value="op-T+-cpx/cpy-abs">op-T+-cpx/cpy-abs</option>
+<option value="op-T+-cpx/cpy-imm/zp">op-T+-cpx/cpy-imm/zp</option>
+<option value="op-T+-dex">op-T+-dex</option>
+<option value="op-T+-inx">op-T+-inx</option>
+<option value="op-T+-iny/dey">op-T+-iny/dey</option>
+<option value="op-T+-ora/and/eor/adc">op-T+-ora/and/eor/adc</option>
+<option value="op-T+-shift-a">op-T+-shift-a</option>
+<option value="op-T0">op-T0</option>
+<option value="op-T0-acc">op-T0-acc</option>
+<option value="op-T0-adc/sbc">op-T0-adc/sbc</option>
+<option value="op-T0-and">op-T0-and</option>
+<option value="op-T0-bit">op-T0-bit</option>
+<option value="op-T0-brk/rti">op-T0-brk/rti</option>
+<option value="op-T0-clc/sec">op-T0-clc/sec</option>
+<option value="op-T0-cld/sed">op-T0-cld/sed</option>
+<option value="op-T0-cli/sei">op-T0-cli/sei</option>
+<option value="op-T0-cmp">op-T0-cmp</option>
+<option value="op-T0-cpx/cpy/inx/iny">op-T0-cpx/cpy/inx/iny</option>
+<option value="op-T0-cpx/inx">op-T0-cpx/inx</option>
+<option value="op-T0-cpy/iny">op-T0-cpy/iny</option>
+<option value="op-T0-dex">op-T0-dex</option>
+<option value="op-T0-eor">op-T0-eor</option>
+<option value="op-T0-iny/dey">op-T0-iny/dey</option>
+<option value="op-T0-jmp">op-T0-jmp</option>
+<option value="op-T0-jsr">op-T0-jsr</option>
+<option value="op-T0-lda">op-T0-lda</option>
+<option value="op-T0-ldx/tax/tsx">op-T0-ldx/tax/tsx</option>
+<option value="op-T0-ldy-mem">op-T0-ldy-mem</option>
+<option value="op-T0-ora">op-T0-ora</option>
+<option value="op-T0-php/pha">op-T0-php/pha</option>
+<option value="op-T0-pla">op-T0-pla</option>
+<option value="op-T0-plp">op-T0-plp</option>
+<option value="op-T0-sbc">op-T0-sbc</option>
+<option value="op-T0-shift-a">op-T0-shift-a</option>
+<option value="op-T0-shift-right-a">op-T0-shift-right-a</option>
+<option value="op-T0-tax">op-T0-tax</option>
+<option value="op-T0-tay">op-T0-tay</option>
+<option value="op-T0-tay/ldy-not-idx">op-T0-tay/ldy-not-idx</option>
+<option value="op-T0-tsx">op-T0-tsx</option>
+<option value="op-T0-txa">op-T0-txa</option>
+<option value="op-T0-txs">op-T0-txs</option>
+<option value="op-T0-tya">op-T0-tya</option>
+<option value="op-T2">op-T2</option>
+<option value="op-T2-ADL/ADD">op-T2-ADL/ADD</option>
+<option value="op-T2-abs">op-T2-abs</option>
+<option value="op-T2-abs-access">op-T2-abs-access</option>
+<option value="op-T2-abs-y">op-T2-abs-y</option>
+<option value="op-T2-branch">op-T2-branch</option>
+<option value="op-T2-brk">op-T2-brk</option>
+<option value="op-T2-idx-x-xy">op-T2-idx-x-xy</option>
+<option value="op-T2-ind">op-T2-ind</option>
+<option value="op-T2-ind-x">op-T2-ind-x</option>
+<option value="op-T2-ind-y">op-T2-ind-y</option>
+<option value="op-T2-jmp-abs">op-T2-jmp-abs</option>
+<option value="op-T2-jsr">op-T2-jsr</option>
+<option value="op-T2-mem-zp">op-T2-mem-zp</option>
+<option value="op-T2-pha">op-T2-pha</option>
+<option value="op-T2-php">op-T2-php</option>
+<option value="op-T2-php/pha">op-T2-php/pha</option>
+<option value="op-T2-stack">op-T2-stack</option>
+<option value="op-T2-stack-access">op-T2-stack-access</option>
+<option value="op-T2-zp/zp-idx">op-T2-zp/zp-idx</option>
+<option value="op-T3">op-T3</option>
+<option value="op-T3-abs-idx">op-T3-abs-idx</option>
+<option value="op-T3-abs/idx/ind">op-T3-abs/idx/ind</option>
+<option value="op-T3-branch">op-T3-branch</option>
+<option value="op-T3-ind-x">op-T3-ind-x</option>
+<option value="op-T3-ind-y">op-T3-ind-y</option>
+<option value="op-T3-jmp">op-T3-jmp</option>
+<option value="op-T3-jsr">op-T3-jsr</option>
+<option value="op-T3-mem-abs">op-T3-mem-abs</option>
+<option value="op-T3-mem-zp-idx">op-T3-mem-zp-idx</option>
+<option value="op-T3-plp/pla">op-T3-plp/pla</option>
+<option value="op-T3-stack/bit/jmp">op-T3-stack/bit/jmp</option>
+<option value="op-T4">op-T4</option>
+<option value="op-T4-abs-idx">op-T4-abs-idx</option>
+<option value="op-T4-brk">op-T4-brk</option>
+<option value="op-T4-brk/jsr">op-T4-brk/jsr</option>
+<option value="op-T4-ind-x">op-T4-ind-x</option>
+<option value="op-T4-ind-y">op-T4-ind-y</option>
+<option value="op-T4-jmp">op-T4-jmp</option>
+<option value="op-T4-mem-abs-idx">op-T4-mem-abs-idx</option>
+<option value="op-T4-rti">op-T4-rti</option>
+<option value="op-T4-rts">op-T4-rts</option>
+<option value="op-T5-brk">op-T5-brk</option>
+<option value="op-T5-ind-x">op-T5-ind-x</option>
+<option value="op-T5-ind-y">op-T5-ind-y</option>
+<option value="op-T5-jsr">op-T5-jsr</option>
+<option value="op-T5-mem-ind-idx">op-T5-mem-ind-idx</option>
+<option value="op-T5-rti">op-T5-rti</option>
+<option value="op-T5-rti/rts">op-T5-rti/rts</option>
+<option value="op-T5-rts">op-T5-rts</option>
+<option value="op-asl/rol">op-asl/rol</option>
+<option value="op-branch-done">op-branch-done</option>
+<option value="op-brk/rti">op-brk/rti</option>
+<option value="op-clv">op-clv</option>
+<option value="op-from-x">op-from-x</option>
+<option value="op-implied">op-implied</option>
+<option value="op-inc/nop">op-inc/nop</option>
+<option value="op-jmp">op-jmp</option>
+<option value="op-jsr">op-jsr</option>
+<option value="op-lsr/ror/dec/inc">op-lsr/ror/dec/inc</option>
+<option value="op-plp/pla">op-plp/pla</option>
+<option value="op-push/pull">op-push/pull</option>
+<option value="op-rmw">op-rmw</option>
+<option value="op-rol/ror">op-rol/ror</option>
+<option value="op-ror">op-ror</option>
+<option value="op-rti/rts">op-rti/rts</option>
+<option value="op-shift">op-shift</option>
+<option value="op-shift-right">op-shift-right</option>
+<option value="op-sta/cmp">op-sta/cmp</option>
+<option value="op-store">op-store</option>
+<option value="op-sty/cpy-mem">op-sty/cpy-mem</option>
+<option value="op-xy">op-xy</option>
+<option value="p0">p0</option>
+<option value="p1">p1</option>
+<option value="p2">p2</option>
+<option value="p3">p3</option>
+<option value="p4">p4</option>
+<option value="p5">p5</option>
+<option value="p6">p6</option>
+<option value="p7">p7</option>
+<option value="pch0">pch0</option>
+<option value="pch1">pch1</option>
+<option value="pch2">pch2</option>
+<option value="pch3">pch3</option>
+<option value="pch4">pch4</option>
+<option value="pch5">pch5</option>
+<option value="pch6">pch6</option>
+<option value="pch7">pch7</option>
+<option value="pchp0">pchp0</option>
+<option value="pchp1">pchp1</option>
+<option value="pchp2">pchp2</option>
+<option value="pchp3">pchp3</option>
+<option value="pchp4">pchp4</option>
+<option value="pchp5">pchp5</option>
+<option value="pchp6">pchp6</option>
+<option value="pchp7">pchp7</option>
+<option value="pcl0">pcl0</option>
+<option value="pcl1">pcl1</option>
+<option value="pcl2">pcl2</option>
+<option value="pcl3">pcl3</option>
+<option value="pcl4">pcl4</option>
+<option value="pcl5">pcl5</option>
+<option value="pcl6">pcl6</option>
+<option value="pcl7">pcl7</option>
+<option value="pclp0">pclp0</option>
+<option value="pclp1">pclp1</option>
+<option value="pclp2">pclp2</option>
+<option value="pclp3">pclp3</option>
+<option value="pclp4">pclp4</option>
+<option value="pclp5">pclp5</option>
+<option value="pclp6">pclp6</option>
+<option value="pclp7">pclp7</option>
+<option value="pd0">pd0</option>
+<option value="pd0.clearIR">pd0.clearIR</option>
+<option value="pd1">pd1</option>
+<option value="pd1.clearIR">pd1.clearIR</option>
+<option value="pd2">pd2</option>
+<option value="pd2.clearIR">pd2.clearIR</option>
+<option value="pd3">pd3</option>
+<option value="pd3.clearIR">pd3.clearIR</option>
+<option value="pd4">pd4</option>
+<option value="pd4.clearIR">pd4.clearIR</option>
+<option value="pd5">pd5</option>
+<option value="pd5.clearIR">pd5.clearIR</option>
+<option value="pd6">pd6</option>
+<option value="pd6.clearIR">pd6.clearIR</option>
+<option value="pd7">pd7</option>
+<option value="pd7.clearIR">pd7.clearIR</option>
+<option value="pipe#T0">pipe#T0</option>
+<option value="pipe#VEC">pipe#VEC</option>
+<option value="pipe#WR.phi2">pipe#WR.phi2</option>
+<option value="pipeIPCrelated">pipeIPCrelated</option>
+<option value="pipeT-SYNC">pipeT-SYNC</option>
+<option value="pipeT2out">pipeT2out</option>
+<option value="pipeT3out">pipeT3out</option>
+<option value="pipeT4out">pipeT4out</option>
+<option value="pipeT5out">pipeT5out</option>
+<option value="pipeUNK01">pipeUNK01</option>
+<option value="pipeUNK02">pipeUNK02</option>
+<option value="pipeUNK03">pipeUNK03</option>
+<option value="pipeUNK04">pipeUNK04</option>
+<option value="pipeUNK05">pipeUNK05</option>
+<option value="pipeUNK06">pipeUNK06</option>
+<option value="pipeUNK07">pipeUNK07</option>
+<option value="pipeUNK08">pipeUNK08</option>
+<option value="pipeUNK09">pipeUNK09</option>
+<option value="pipeUNK10">pipeUNK10</option>
+<option value="pipeUNK11">pipeUNK11</option>
+<option value="pipeUNK12">pipeUNK12</option>
+<option value="pipeUNK13">pipeUNK13</option>
+<option value="pipeUNK14">pipeUNK14</option>
+<option value="pipeUNK15">pipeUNK15</option>
+<option value="pipeUNK16">pipeUNK16</option>
+<option value="pipeUNK17">pipeUNK17</option>
+<option value="pipeUNK18">pipeUNK18</option>
+<option value="pipeUNK19">pipeUNK19</option>
+<option value="pipeUNK20">pipeUNK20</option>
+<option value="pipeUNK21">pipeUNK21</option>
+<option value="pipeUNK22">pipeUNK22</option>
+<option value="pipeUNK23">pipeUNK23</option>
+<option value="pipeUNK26">pipeUNK26</option>
+<option value="pipeUNK27">pipeUNK27</option>
+<option value="pipeUNK28">pipeUNK28</option>
+<option value="pipeUNK29">pipeUNK29</option>
+<option value="pipeUNK30">pipeUNK30</option>
+<option value="pipeUNK31">pipeUNK31</option>
+<option value="pipeUNK32">pipeUNK32</option>
+<option value="pipeUNK33">pipeUNK33</option>
+<option value="pipeUNK34">pipeUNK34</option>
+<option value="pipeUNK35">pipeUNK35</option>
+<option value="pipeUNK36">pipeUNK36</option>
+<option value="pipeUNK37">pipeUNK37</option>
+<option value="pipeUNK39">pipeUNK39</option>
+<option value="pipeUNK40">pipeUNK40</option>
+<option value="pipeUNK41">pipeUNK41</option>
+<option value="pipeUNK42">pipeUNK42</option>
+<option value="pipeVectorA0">pipeVectorA0</option>
+<option value="pipeVectorA1">pipeVectorA1</option>
+<option value="pipeVectorA2">pipeVectorA2</option>
+<option value="pipedpc28">pipedpc28</option>
+<option value="pipephi2Reset0">pipephi2Reset0</option>
+<option value="pipephi2Reset0x">pipephi2Reset0x</option>
+<option value="pipe~T0">pipe~T0</option>
+<option value="pipe~VEC">pipe~VEC</option>
+<option value="pipe~WR.phi2">pipe~WR.phi2</option>
+<option value="rdy">rdy</option>
+<option value="res">res</option>
+<option value="rw">rw</option>
+<option value="s0">s0</option>
+<option value="s1">s1</option>
+<option value="s2">s2</option>
+<option value="s3">s3</option>
+<option value="s4">s4</option>
+<option value="s5">s5</option>
+<option value="s6">s6</option>
+<option value="s7">s7</option>
+<option value="sb0">sb0</option>
+<option value="sb1">sb1</option>
+<option value="sb2">sb2</option>
+<option value="sb3">sb3</option>
+<option value="sb4">sb4</option>
+<option value="sb5">sb5</option>
+<option value="sb6">sb6</option>
+<option value="sb7">sb7</option>
+<option value="short-circuit-branch-add">short-circuit-branch-add</option>
+<option value="short-circuit-idx-add">short-circuit-idx-add</option>
+<option value="so">so</option>
+<option value="sync">sync</option>
+<option value="t2">t2</option>
+<option value="t3">t3</option>
+<option value="t4">t4</option>
+<option value="t5">t5</option>
+<option value="vcc">vcc</option>
+<option value="vss">vss</option>
+<option value="x-op-T+-adc/sbc">x-op-T+-adc/sbc</option>
+<option value="x-op-T0-bit">x-op-T0-bit</option>
+<option value="x-op-T0-txa">x-op-T0-txa</option>
+<option value="x-op-T0-tya">x-op-T0-tya</option>
+<option value="x-op-T3-abs-idx">x-op-T3-abs-idx</option>
+<option value="x-op-T3-ind-y">x-op-T3-ind-y</option>
+<option value="x-op-T3-plp/pla">x-op-T3-plp/pla</option>
+<option value="x-op-T4-ind-y">x-op-T4-ind-y</option>
+<option value="x-op-T4-rti">x-op-T4-rti</option>
+<option value="x-op-jmp">x-op-jmp</option>
+<option value="x-op-push/pull">x-op-push/pull</option>
+<option value="x0">x0</option>
+<option value="x1">x1</option>
+<option value="x2">x2</option>
+<option value="x3">x3</option>
+<option value="x4">x4</option>
+<option value="x5">x5</option>
+<option value="x6">x6</option>
+<option value="x7">x7</option>
+<option value="xx-op-T5-jsr">xx-op-T5-jsr</option>
+<option value="y0">y0</option>
+<option value="y1">y1</option>
+<option value="y2">y2</option>
+<option value="y3">y3</option>
+<option value="y4">y4</option>
+<option value="y5">y5</option>
+<option value="y6">y6</option>
+<option value="y7">y7</option>
+<option value="~(A+B)0">~(A+B)0</option>
+<option value="~(A+B)1">~(A+B)1</option>
+<option value="~(A+B)2">~(A+B)2</option>
+<option value="~(A+B)3">~(A+B)3</option>
+<option value="~(A+B)4">~(A+B)4</option>
+<option value="~(A+B)5">~(A+B)5</option>
+<option value="~(A+B)6">~(A+B)6</option>
+<option value="~(A+B)7">~(A+B)7</option>
+<option value="~(AxB)0">~(AxB)0</option>
+<option value="~(AxB)1">~(AxB)1</option>
+<option value="~(AxB)2">~(AxB)2</option>
+<option value="~(AxB)3">~(AxB)3</option>
+<option value="~(AxB)4">~(AxB)4</option>
+<option value="~(AxB)5">~(AxB)5</option>
+<option value="~(AxB)6">~(AxB)6</option>
+<option value="~(AxB)7">~(AxB)7</option>
+<option value="~(AxB1).C01">~(AxB1).C01</option>
+<option value="~(AxB3).C23">~(AxB3).C23</option>
+<option value="~(AxB5).C45">~(AxB5).C45</option>
+<option value="~(AxB7).C67">~(AxB7).C67</option>
+<option value="~(AxBxC)0">~(AxBxC)0</option>
+<option value="~(AxBxC)1">~(AxBxC)1</option>
+<option value="~(AxBxC)2">~(AxBxC)2</option>
+<option value="~(AxBxC)3">~(AxBxC)3</option>
+<option value="~(AxBxC)4">~(AxBxC)4</option>
+<option value="~(AxBxC)5">~(AxBxC)5</option>
+<option value="~(AxBxC)6">~(AxBxC)6</option>
+<option value="~(AxBxC)7">~(AxBxC)7</option>
+<option value="~A.B0">~A.B0</option>
+<option value="~A.B1">~A.B1</option>
+<option value="~A.B2">~A.B2</option>
+<option value="~A.B3">~A.B3</option>
+<option value="~A.B4">~A.B4</option>
+<option value="~A.B5">~A.B5</option>
+<option value="~A.B6">~A.B6</option>
+<option value="~A.B7">~A.B7</option>
+<option value="~ABH0">~ABH0</option>
+<option value="~ABH1">~ABH1</option>
+<option value="~ABH2">~ABH2</option>
+<option value="~ABH3">~ABH3</option>
+<option value="~ABH4">~ABH4</option>
+<option value="~ABH5">~ABH5</option>
+<option value="~ABH6">~ABH6</option>
+<option value="~ABH7">~ABH7</option>
+<option value="~ABL0">~ABL0</option>
+<option value="~ABL1">~ABL1</option>
+<option value="~ABL2">~ABL2</option>
+<option value="~ABL3">~ABL3</option>
+<option value="~ABL4">~ABL4</option>
+<option value="~ABL5">~ABL5</option>
+<option value="~ABL6">~ABL6</option>
+<option value="~ABL7">~ABL7</option>
+<option value="~C01">~C01</option>
+<option value="~C12">~C12</option>
+<option value="~C23">~C23</option>
+<option value="~C34">~C34</option>
+<option value="~C45">~C45</option>
+<option value="~C56">~C56</option>
+<option value="~C67">~C67</option>
+<option value="~C78">~C78</option>
+<option value="~DA-ADD1">~DA-ADD1</option>
+<option value="~DA-ADD2">~DA-ADD2</option>
+<option value="~DBE">~DBE</option>
+<option value="~DBZ">~DBZ</option>
+<option value="~IRQP">~IRQP</option>
+<option value="~NMIG">~NMIG</option>
+<option value="~NMIP">~NMIP</option>
+<option value="~TWOCYCLE">~TWOCYCLE</option>
+<option value="~TWOCYCLE.phi1">~TWOCYCLE.phi1</option>
+<option value="~VEC">~VEC</option>
+<option value="~WR">~WR</option>
+<option value="~alucout">~alucout</option>
+<option value="~aluresult0">~aluresult0</option>
+<option value="~aluresult1">~aluresult1</option>
+<option value="~aluresult2">~aluresult2</option>
+<option value="~aluresult3">~aluresult3</option>
+<option value="~aluresult4">~aluresult4</option>
+<option value="~aluresult5">~aluresult5</option>
+<option value="~aluresult6">~aluresult6</option>
+<option value="~aluresult7">~aluresult7</option>
+<option value="~notRdy0.delay">~notRdy0.delay</option>
+<option value="~op-T3-branch">~op-T3-branch</option>
+<option value="~op-branch-bit6">~op-branch-bit6</option>
+<option value="~op-branch-bit7">~op-branch-bit7</option>
+<option value="~op-branch-done">~op-branch-done</option>
+<option value="~op-set-C">~op-set-C</option>
+<option value="~op-store">~op-store</option>
+<option value="~pchp0">~pchp0</option>
+<option value="~pchp1">~pchp1</option>
+<option value="~pchp2">~pchp2</option>
+<option value="~pchp3">~pchp3</option>
+<option value="~pchp4">~pchp4</option>
+<option value="~pchp5">~pchp5</option>
+<option value="~pchp6">~pchp6</option>
+<option value="~pchp7">~pchp7</option>
+<option value="~pclp0">~pclp0</option>
+<option value="~pclp1">~pclp1</option>
+<option value="~pclp2">~pclp2</option>
+<option value="~pclp3">~pclp3</option>
+<option value="~pclp4">~pclp4</option>
+<option value="~pclp5">~pclp5</option>
+<option value="~pclp6">~pclp6</option>
+<option value="~pclp7">~pclp7</option>
+<option value="~~alucout">~~alucout</option>
+    </select>
+
+<!-- </form> -->
+<!--  <form> -->
+  <!-- mike -->
+ <div id="mikeOptions2">
+    <input type="checkbox" name="zoomOnFind" id="zoomOnFindid" onchange="mikeSetNoZoomOnFind(this)" />Zoom on Find</input>
+    <input type="button" id="mikebutresetZoom" value="Reset Zoom" onclick="mikeresetZoom()" />
+   </div>
+
+  <input type="button" value="Clear Highlighting" onclick="clearHighlight();" />
+  <span class="animatebox">
+    Animate during simulation:
+    <input type="checkbox" id="animateModeCheckbox" onchange="updateChipLayoutAnimation(this.checked)"
+    /></span>
+
+  <input type="button" value="Hide Chip Layout" onclick="updateChipLayoutVisibility(false)" />
+  <a href="" id="linkHere" >Link to this location</a>
+
+  <input type="button" value="Show Boxes" onclick="mikeShowBoxes()" />
+
+   <div id="mikeSortButtons">
+    <input type="checkbox" name="sortAlpha" id="sortbyAlph" class="mikeSortButtons" onchange="mikeAlphaSort()" />(Sort by Alpha)
+    <input type="checkbox" name="sortSyms"  id="sortBySyms" class="mikeSortButtons" onchange="mikeSymSort()" />(Sort by Symbols)
+   </div>
+ </form>
+
+</div>
+</div> <!-- closing leftcolumn -->
+<div class="rightcolumn" id="rightcolumn">
+<div id="righttopdiv">
+<div class = "buttons">
+  <div class="twobuttons">
+    <a href ="javascript:stopChip()" id="stop"><img class="navstop" src="images/stop.png" title="stop"></a>
+    <a href ="javascript:runChip()"  id="start"><img class="navplay" src="images/play.png" title="run"></a>
+  </div>
+  <div class="morebuttons">
+    <a href ="javascript:resetChip()"><img class="navbutton" src="images/up.png" title="reset"></a>
+    <a href ="javascript:stepBack()"><img class="navbutton" src="images/prev.png" title="back"></a>
+    <a href ="javascript:stepForward()"><img class="navbutton" src="images/next.png" title="forward"></a>
+    <a href ="javascript:goUntilSyncOrWrite()"><img class="navbutton" src="images/singlestep.png" title="step"></a>
+    <a href ="javascript:goFor()"><img class="navbutton" src="images/fastforward.png" title="fastforward"></a>
+  </div>
+  <div style="float:right;">
+    <a href="http://visual6502.org/wiki/index.php?title=JssimUserHelp" target="_blank">User Guide</a>
+    &nbsp;
+  </div>
+</div>  <!-- buttons -->
+<div class="status" id="status"><p>x: 0<br>y: 0</p>
+</div> <!-- status -->
+
+   <div id="memtablediv">
+	<table class="memtable" id="memtable" tabindex="2"></table>
+   </div>
+</div> <!-- righttopdiv -->
+
+   <div id="tracingdiv">
+        <textarea id="consolebox">
+click here and type if your program handles input
+        </textarea>
+	<div id="expertControlPanel" tabindex="3">
+	  <form action="javascript:updateLogList()">
+	  <input type="button" value="Trace more" onclick="updateLoglevel(++loglevel)" />
+	  <input type="button" value="Trace less" onclick="updateLoglevel(--loglevel)" />
+	  <input type="button" value="Trace these too:" onclick="updateLogList()" />
+            <input type="text" id="LogThese" name="LogThese" value="" />
+	  <input type="button" value="Log Up/Down" onclick="updateLogDirection();" />
+	  <input type="button" value="Clear Log" onclick="updateLoglevel(loglevel)" />
+	  </form>
+	  <br />
+	</div>
+	<div id="logstreamscroller">
+	       <table class="logstream" id="logstream"></table>
+	</div>
+   </div>
+</div> <!-- closing rightcolumn -->
+</div> <!-- closing 'frame' div -->
+</body>
+</html>

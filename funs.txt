@@ -1,0 +1,283 @@
+File chipsim.js:
+ recalcNodeList(list)
+ recalcNode(node)
+ turnTransistorOn(t)
+ turnTransistorOff(t)
+ addRecalcNode(nn)
+ getNodeGroup(i)
+ addNodeToGroup(i)
+ getNodeValue
+ isNodeHigh(nn)
+ saveString(name, str)
+ allNodes
+ stateString
+ showState(str)
+ setPd(name)
+ setHigh(name)
+ setLow(name)
+ arrayContains(arr, el)return arr.indexOf(el)!=-1;}
+
+File expert-allinone.js:
+ setupNodes
+ setupTransistors
+ setupLayerVisibility
+ setupBackground
+ setupOverlay
+ setupHilite
+ setupHitBuffer
+ hitBufferNode(ctx, i, w)
+ hexdigit(n)return '0123456789ABCDEF'.charAt(n);}
+ refresh
+ overlayNode(w)
+ hiliteNode(n)
+ hiliteTrans(n)
+ ctxDrawBox(ctx, xMin, yMin, xMax, yMax)
+ zoomToBox(xmin,xmax,ymin,ymax)
+ drawSeg(ctx, seg)
+ findNodeNumber(x,y)
+ clearHighlight
+ updateShow(layer, on)
+ grScale(x)
+ localx(el, gx)
+ localy(el, gy)
+ setStatus
+ setupNodeNameList
+ nodeName(n)
+ setup
+ setup_part2
+ setup_part3
+ setup_part4
+ detectOldBrowser
+ setupParams
+ updateChipLayoutAnimation(isOn)
+ handleKey(e)
+ mouseDown(e)
+ mouseMove(e)
+ mouseUp(e)
+ setZoom(n)
+ recenter
+ updateLinkHere
+ flashBoxLabel(args)
+ boxLabel(args)
+ hiliteNodeList
+ handleClick(e)
+ updateLoglevel(value)
+ setupExpertMode(isOn)
+ setupConsole
+ updateChipLayoutVisibility(isOn)
+ setupChipLayoutGraphics
+ whereAmIAsQuery
+ whereAmI
+ moveHere(place)
+ setChipStyle(props)
+ recalcNodeList(list)
+ recalcNode(node)
+ turnTransistorOn(t)
+ turnTransistorOff(t)
+ addRecalcNode(nn)
+ getNodeGroup(i)
+ addNodeToGroup(i)
+ getNodeValue
+ isNodeHigh(nn)
+ saveString(name, str)
+ allNodes
+ stateString
+ showState(str)
+ setPd(name)
+ setHigh(name)
+ setLow(name)
+ arrayContains(arr, el)return arr.indexOf(el)!=-1;}
+ setupTable
+ handleCellClick(e)
+ cellKeydown(e)
+ setCellValue(n, val)
+ getCellValue(n)return cellEl(n).val;}
+ selectCell(n)
+ unselectCell
+ cellEl(n)
+ loadProgram
+ go
+ goUntilSync
+ goUntilSyncOrWrite
+ testNMI(n)
+ initChip
+ signalSet(n)
+ updateLogList(names)
+ step
+ halfStep
+ handleBusRead
+ handleBusWrite
+ readAddressBus()
+ readDataBusreturn readBits('db', 8);}
+ readAreturn readBits('a', 8);}
+ readYreturn readBits('y', 8);}
+ readXreturn readBits('x', 8);}
+ readPreturn readBits('p', 8);}
+ readPstring
+ readSPreturn readBits('s', 8);}
+ readPCreturn (readBits('pch', 8)<<8) + readBits('pcl', 8);}
+ readPCLreturn readBits('pcl', 8);}
+ readPCHreturn readBits('pch', 8);}
+ listActiveSignals(pattern)
+ listActiveTCStates()
+ readBit(name)
+ readBits(name, n)
+ busToString(busname)
+ busToHex(busname)
+ writeDataBus(x)
+ mRead(a)
+ mWrite(a, d)memory[a]=d;}
+ clkNodes
+ runChip
+ stopChip
+ resetChip
+ stepForward
+ stepBack
+ chipStatus
+ goFor
+ goForN(n)
+ estimatedHz
+ instantaneousHz
+ initLogbox(names)
+ updateLogDirection
+ updateLogbox(names)
+ getMem
+ setMem(arr)
+ hexWord(n)return (0x10000+n).toString(16).substring(1)}
+ hexByte(n)return (0x100+n).toString(16).substring(1)}
+ adler32(x)
+ dis6502toHTML(byte)
+
+File expertWires.js:
+ setup
+ setup_part2
+ setup_part3
+ setup_part4
+ detectOldBrowser
+ setupParams
+ updateChipLayoutAnimation(isOn)
+ handleKey(e)
+ mouseDown(e)
+ mouseMove(e)
+ mouseUp(e)
+ setZoom(n)
+ recenter
+ updateLinkHere
+ flashBoxLabel(args)
+ boxLabel(args)
+ hiliteNodeList
+ handleClick(e)
+ updateLoglevel(value)
+ setupExpertMode(isOn)
+ setupConsole
+ updateChipLayoutVisibility(isOn)
+ setupChipLayoutGraphics
+ whereAmIAsQuery
+ whereAmI
+ moveHere(place)
+ setChipStyle(props)
+------------------------------------------------
+File kioskWires.js:
+ setup
+ setup_part2
+ setup_part3
+ handleKey(e)
+ mouseDown(e)
+ mouseMove(e)
+ mouseUp(e)
+ setZoom(n)
+ recenter
+ handleClick(e)
+ setChipStyle(props)
+ File macros.js:
+ loadProgram
+ go
+ goUntilSync
+ goUntilSyncOrWrite
+ testNMI(n)
+ initChip
+ signalSet(n)
+ updateLogList(names)
+ step
+ halfStep
+ handleBusRead
+ handleBusWrite
+ readAddressBusreturn readBits('ab', 16);}
+ readDataBusreturn readBits('db', 8);}
+ readAreturn readBits('a', 8);}
+ readYreturn readBits('y', 8);}
+ readXreturn readBits('x', 8);}
+ readPreturn readBits('p', 8);}
+ readPstring
+ readSPreturn readBits('s', 8);}
+ readPCreturn (readBits('pch', 8)<<8) + readBits('pcl', 8);}
+ readPCLreturn readBits('pcl', 8);}
+ readPCHreturn readBits('pch', 8);}
+ listActiveSignals(pattern)
+ listActiveTCStates()
+ readBit(name)
+ readBits(name, n)
+ busToString(busname)
+ busToHex(busname)
+ writeDataBus(x)
+ mRead(a)
+ mWrite(a, d)memory[a]=d;}
+ clkNodes
+ runChip
+ stopChip
+ resetChip
+ stepForward
+ stepBack
+ chipStatus
+ goFor
+ goForN(n)
+ estimatedHz
+ instantaneousHz
+ initLogbox(names)
+ updateLogDirection
+ updateLogbox(names)
+ getMem
+ setMem(arr)
+ hexWord(n)return (0x10000+n).toString(16).substring(1)}
+ hexByte(n)return (0x100+n).toString(16).substring(1)}
+ adler32(x)
+ disassemblytoHTML(byte)
+
+File memtable.js:
+ setupTable
+ handleCellClick(e)
+ cellKeydown(e)
+ setCellValue(n, val)
+ getCellValue(n)return cellEl(n).val;}
+ selectCell(n)
+ unselectCell
+ cellEl(n)
+
+File wires.js:
+ setupNodes
+ setupTransistors
+ setupLayerVisibility
+ setupBackground
+ setupOverlay
+ setupHilite
+ setupHitBuffer
+ hitBufferNode(ctx, i, w)
+ hexdigit(n)return '0123456789ABCDEF'.charAt(n);}
+ refresh
+ overlayNode(w)
+ hiliteNode(n)
+ hiliteTrans(n)
+ ctxDrawBox(ctx, xMin, yMin, xMax, yMax)
+ zoomToBox(xmin,xmax,ymin,ymax)
+ drawSeg(ctx, seg)
+ findNodeNumber(x,y)
+ clearHighlight
+ updateShow(layer, on)
+ grScale(x)
+ localx(el, gx)
+ localy(el, gy)
+ setStatus
+ setupNodeNameList
+ nodeName(n)
+ nowreturn  new Date().getTime();}
+
