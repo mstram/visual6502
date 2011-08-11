@@ -37,8 +37,10 @@ function buildSelectNodesList(){
 
 
 function  mikeSetNoZoomOnFind(cbox){
-  alert('mikeSetNoZoomOnFind ' + cbox.value);
-  mikeNoZoomOnFind = true;
+  //alert('mikeSetNoZoomOnFind ' + cbox.value);
+ // mikeNoZoomOnFind = true;
+  mikeNoZoomOnFind = cbox.value;
+
 }
 
 function mikeresetZoom() {
