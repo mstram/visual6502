@@ -101,7 +101,7 @@ function setup_part4(){
 	logThese=signalSet(loglevel);
 	loadProgram();
 	setupConsole();
-	
+
 	mikeCallUserPlugins();  // defined in plugins.js
 
 	if(noSimulation){

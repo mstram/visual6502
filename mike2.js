@@ -166,13 +166,13 @@ function mikeRaphaelBox1() {
   }
 }
 
-function mikeGetchipbg(){
- return chipbg.getContext('2d');
- }
+//function mikeGetchipbg(){
+// return chipbg.getContext('2d');
+// }
 
-function mikeGetHilite() {
- return hilite.getContext('2d');
-}
+//function mikeGetHilite() {
+// return hilite.getContext('2d');
+//}
 //var ctx = '';
 // called from <ui>.htm handleOnload()
 
