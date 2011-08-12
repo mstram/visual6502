@@ -13,7 +13,6 @@
 */
 
 // mike
-var mikeNoZoomOnFind = false;
 
 var centerx=300, centery=300;
 var zoom=1;
@@ -32,7 +31,7 @@ var labelThese=[];
 //   overlay - a red/white transparency to show logic high or low
 //   hilite - to show the selected polygon
 //   hitbuffer - abusing color values to return which polygon is under a point
-// we no longer use a scaling transform - we now scale the chip data at 
+// we no longer use a scaling transform - we now scale the chip data at
 //   the point of drawing line segments
 // if the canvas is any smaller than chip coordinates there will be
 //   rounding artifacts, and at high zoom there will be anti-aliasing on edges.
@@ -46,7 +45,7 @@ var layernames = ['metal', 'switched diffusion', 'inputdiode', 'grounded diffusi
 var colors = ['rgba(128,128,192,0.4)','#FFFF00','#FF00FF','#4DFF4D',
               '#FF4D4D','#801AC0','rgba(128,0,255,0.75)'];
 var drawlayers = [true, true, true, true, true, true];
-              
+
 // some modes and parameters which can be passed in from the URL query
 var moveHereFirst;
 var expertMode=true;
@@ -64,6 +63,7 @@ var testprogramAddress;
 // Drawing Setup
 //
 /////////////////////////
+
 
 // try to present a meaningful page before starting expensive work
 function setup(){
@@ -101,6 +101,9 @@ function setup_part4(){
 	logThese=signalSet(loglevel);
 	loadProgram();
 	setupConsole();
+	
+	mikeCallUserPlugins();  // defined in plugins.js
+
 	if(noSimulation){
 		stopChip();
 		running=undefined;

@@ -10,14 +10,17 @@
 //alert('mike2:mikeNoZoomOnFind = ' + mikeNoZoomOnFind);
 
 function buildSelectNodesList(){
+  //
+  // builds a select (picklist) in the UI from nodenames.js
+  //
     var sortedNodes = '';
     var temp = [];
 
   //  alert('buildSelectNodesList');
     console.log('buildSelectNodesList');
-    for(n in nodenames) {temp.push(n);}
 
-    sortedNodes = temp.sort();
+    for(n in nodenames) {temp.push(n);}
+        sortedNodes = temp.sort();
 
     var selObj   = document.getElementById('selMikeHighlightList');
     var elOptOld = selObj.options[selObj.selectedIndex];
@@ -35,29 +38,18 @@ function buildSelectNodesList(){
    //alert('hello there');
 }
 
+function doMikeSelect1(){
+        var selObj       = document.getElementById('selMikeHighlightList');
+	var txtValueObj  = document.getElementById('HighlightThese');
+	var selIndex     = selObj.selectedIndex;
 
-function  mikeSetNoZoomOnFind(cbox){
-  //alert('mikeSetNoZoomOnFind ' + cbox.value);
- // mikeNoZoomOnFind = true;
-  mikeNoZoomOnFind = cbox.value;
+        if(mikeNodeListSelectReplaceInTextBox == true){
+	 txtValueObj.value = selObj.options[selIndex].value;
+        }
+        else
+         txtValueObj.value = txtValueObj.value + ' ' + selObj.options[selIndex].value;
 
-}
-
-function mikeresetZoom() {
-// alert('mikeresetZoom');
- setZoom(1);
-}
-
-function mikeShowBoxes() {
-   boxLabel(['IR',   50, 8432, 2332, 9124,  984]);
-   boxLabel(['PLA', 100, 1169, 2328, 8393,  934]);
-   boxLabel(['Y',    50, 2143, 8820, 2317, 5689]);
-   boxLabel(['X',    50, 2317, 8820, 2490, 5689]);
-//   boxLabel(['S',    50, 2490, 8820, 2814, 5689]);
-//   boxLabel(['ALU',  50, 2814, 8820, 4525, 5689]);
-//   boxLabel(['DAdj', 40, 4525, 8820, 5040, 5689]);
-   boxLabel(['A',    50, 5040, 8820, 5328, 5689]);
-   boxLabel(['PC',   50, 5559, 8820, 6819, 5689]);
+      //  alert('selection changed to :' + selObj.options[selIndex].value);
 }
 
 function mikeAddToList() {
@@ -75,26 +67,123 @@ function mikeAddToList() {
        selObj.add(elOptNew, elOptOld);
 }
 
-function doMikeSelect1(){
-        var selObj       = document.getElementById('selMikeHighlightList');
-	var txtValueObj  = document.getElementById('HighlightThese');
-	var selIndex     = selObj.selectedIndex;
 
-	txtValueObj.value = selObj.options[selIndex].value;
-      //  alert('selection changed to :' + selObj.options[selIndex].value);
+
+function  mikeSetNoZoomOnFind(cbox){
+  //alert('mikeSetNoZoomOnFind ' + cbox.value);
+ // mikeNoZoomOnFind = true;
+  mikeNoZoomOnFind = cbox.value;
+
 }
+
+function mikeresetZoom() {
+// alert('mikeresetZoom');
+ setZoom(1);
+}
+
+function mikeLastZoom() {
+ alert('mikeLastZoom');
+// setZoom(1);
+}
+
+function mikeShowBoxes() {
+   boxLabel(['IR',   50, 8432, 2332, 9124,  984]);
+   boxLabel(['PLA', 100, 1169, 2328, 8393,  934]);
+   boxLabel(['Y',    50, 2143, 8820, 2317, 5689]);
+   boxLabel(['X',    50, 2317, 8820, 2490, 5689]);
+//   boxLabel(['S',    50, 2490, 8820, 2814, 5689]);
+//   boxLabel(['ALU',  50, 2814, 8820, 4525, 5689]);
+//   boxLabel(['DAdj', 40, 4525, 8820, 5040, 5689]);
+   boxLabel(['A',    50, 5040, 8820, 5328, 5689]);
+   boxLabel(['PC',   50, 5559, 8820, 6819, 5689]);
+}
+
+
 
 function mikeAlphaSort(){
   alert('mikeAlphaSort');
 }
 
 function mikeSymSort(){
-  alert('mikeAlphaSort');
+  alert('mikeSymSort');
 }
+
+function mikeSetNodeListAppendOrReplace(cbox){
+ // this is defined in expertWires.js
+  mikeNodeListSelectReplaceInTextBox = cbox.value;
+}
+
+
+var dragger = function (e){
+	this.dx = e.clientX;
+	this.dy = e.clientY;
+	isDrag = this;
+}
+
+var rectangle=[];
+
+function getColr(){
+	var Colr="#bfbfbf"
+	while(Colr=="#bfbfbf")	{
+		Colr=Raphael.getColor();
+	}
+	return Colr;
+}
+
+var ctxSave;
+function mikeBlackBox1() {
+// var ctx = mikeGetchipbg();
+// var ctx = mikeGetHilite();
+ // console.log('mike: ctx = ' + ctx);
+
+ ctx.save();
+ ctx.fillStyle = 'rgba(0,0,0,255)';
+ //ctx.fillStyle = 'rgba(255,255,255,255)';
+ ctx.fillRect (500,500,300,300);
+}
+function mikeEraseBlackBox1() {
+  ctx.restore();
+}
+
+
+var paper;
+function mikeRaphaelBox1() {
+ //alert('mikeRaphaelBox1');
+ paper = new Raphael(document.getElementById('chipsurround'), 300, 300);
+// paper = new Raphael(document.getElementById('chipsurround'), 1,1);
+ var rec1 = paper.rect(100, 100, 150, 200);
+ rec1.attr({fill: '#aaa'});
+ var x = 0;
+ for(var i=0; i<10;i++) {
+	y=(Math.floor(i/8))*40;
+	x++;
+	x=x>7?0:x;
+	if(i!=33){
+	  rectangle[i]=paper.rect(x*80,y , 80, 40, 10).attr({fill: getColr()});
+	  rectangle[i].node.style.cursor = 'move';
+	  rectangle[i].mousedown(dragger);
+	}
+  }
+}
+
+function mikeGetchipbg(){
+ return chipbg.getContext('2d');
+ }
+
+function mikeGetHilite() {
+ return hilite.getContext('2d');
+}
+//var ctx = '';
+// called from <ui>.htm handleOnload()
+
+var mikeNoZoomOnFind = false;
+var mikeNodeListSelectReplaceInTextBox = true;
 
 function mikeinit(){
  // alert('mikeinit');
+  //ctx = mikeGetHilite();
+  console.log('mikeinit: ctx = ' + ctx);
   buildSelectNodesList();
 }
 
-//mikeinit();
+// end of file

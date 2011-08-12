@@ -71,6 +71,7 @@ function setupLayerVisibility(){
 	}
 }
 
+
 function setupBackground(){
 	chipbg = document.getElementById('chipbg');
 	chipbg.width = grCanvasSize;
@@ -89,7 +90,7 @@ function setupBackground(){
 			ctx.fill();
 			if((c==0)||(c==6)) ctx.stroke();
 		}
-	}		
+	}
 }
 
 function setupOverlay(){

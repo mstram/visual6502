@@ -1,4 +1,3 @@
-
 //document.write("<table>")res: 159,       // pads: reset
 var customFind =[
 'res',
@@ -18,11 +17,10 @@ var customFind =[
 'pipephi2Reset0x', // a second copy of the same latch
 'fetch',          // internal signal
 'irline3',    // internal signal: PLA input - ir0 AND ir1
-'ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7      // instruction register
+'ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7',      // instruction register
+'a0,a1,a2,a3,a4,a5,a6,a7',
+'ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7,a0,a1,a2,a3,a4,a5,a6,a7',
+'ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7,x0,x1,x2,x3,x4,x5,x6,x7'
+'x0,x1,x2,x3,x4,x5,x6,x7',
 
-a0,a1,a2,a3,a4,a5,a6,a7
 
-ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7,a0,a1,a2,a3,a4,a5,a6,a7
-
-ir0,ir1,ir2,ir3,ir4,ir5,ir6,ir7,x0,x1,x2,x3,x4,x5,x6,x7
-x0,x1,x2,x3,x4,x5,x6,x7
