@@ -1,2 +1,2 @@
-git push -u vis6502 master
+git push vis6502 master
 
