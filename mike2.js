@@ -70,9 +70,11 @@ function mikeAddToList() {
 
 
 function  mikeSetNoZoomOnFind(cbox){
-  //alert('mikeSetNoZoomOnFind ' + cbox.value);
- // mikeNoZoomOnFind = true;
+ alert('mikeSetNoZoomOnFind ' + cbox.value);
   mikeNoZoomOnFind = cbox.value;
+ if(cbox.value) {
+  mikeNoZoomOnFind = true;
+ }
 
 }
 
